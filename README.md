@@ -41,24 +41,24 @@ text
 
 ## Key Features
 
-### 🔍 Detection
+### Detection
 - Real-time packet capture on network interface
 - Detects ICMP, SYN, and UDP floods
 - Detects port scans (15+ ports in 10 seconds)
 - Adaptive threshold that learns normal traffic patterns
 
-### 🧠 Intelligent Decision Making
+### Intelligent Decision Making
 - Each IP has a trust score (0 to 100)
 - Trust decreases when IP attacks, recovers over time
 - Three security zones (RED, YELLOW, GREEN) with different rules
 - Block duration increases for repeat offenders (exponential backoff)
 
-### 🤖 AI-Powered Analysis
+### AI-Powered Analysis
 - Local Ollama LLM (qwen3:4b) - completely free, no API key
 - Analyzes every blocked attack automatically
 - Provides threat level, attack pattern, assessment, and recommendation
 
-### 📊 SOC Dashboard
+### SOC Dashboard
 - Real-time attack feed with HMAC signatures
 - Live charts and graphs
 - Network map showing attack path
@@ -158,22 +158,16 @@ Tenet	How it's implemented
 6	HMAC-SHA256 signatures on all logs
 7	Adaptive threshold based on traffic baseline
 Why This Project Matters for My Internship
+
 This project demonstrates:
 
-✅ Blue Team Skills: Detection, blocking, monitoring, incident response
-✅ NIST Knowledge: Zero Trust architecture implementation
-✅ AI Integration: Using LLMs for security analysis
-✅ Full Stack Development: Python backend + web dashboard
-✅ System Design: Distributed architecture with 3 agents
-✅ Security Standards: OWASP, NIST, secure coding practices
+Blue Team Skills: Detection, blocking, monitoring, incident response
+NIST Knowledge: Zero Trust architecture implementation
+AI Integration: Using LLMs for security analysis
+Full Stack Development: Python backend + web dashboard
+System Design: Distributed architecture with 3 agents
+Security Standards: OWASP, NIST, secure coding practices
 
 Author
 Muhammad Zain Tanveer
 BS Cyber Security, Air University Islamabad
-
-GitHub: 241590-Adam
-
-LinkedIn: zain-tanveer
-
-License
-MIT License - Free to use for learning and portfolio purposes.
