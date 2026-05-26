@@ -72,8 +72,8 @@ text
 
 | Machine | IP Address | Role |
 |---------|------------|------|
-| Windows | 192.168.50.1 | PDP + Dashboard |
-| Ubuntu | 192.168.50.135 | IDS + PEP |
+| Windows | 192.168.x.x | PDP + Dashboard |
+| Ubuntu | 192.168.x.x | IDS + PEP |
 
 ### Step 1: Install Dependencies
 
