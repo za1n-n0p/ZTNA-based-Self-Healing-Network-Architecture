@@ -1,173 +1,170 @@
-# ZTNA-based Self-Healing Network Architecture
+# Zero Trust Self-Healing Network
+### NIST SP 800-207 Compliant IDS/PDP/PEP System
 
-NIST SP 800-207 compliant Zero Trust Network Architecture with automated threat detection and response.
+A working multi-machine network security system that automatically detects attacks, blocks threats, and self-heals — all without human intervention. Built as a university project to practically implement Zero Trust Architecture principles from NIST SP 800-207.
 
-## What is this project?
+---
 
-A complete security system that automatically detects cyber attacks, blocks them, and analyzes threats using AI. Think of it as your own mini-SOC (Security Operations Center).
+## What It Does
 
-**What it does:**
-- Detects DDoS attacks, port scans, and floods in real-time
-- Automatically blocks attackers using firewall rules
-- Analyzes threats using local AI (no internet needed)
-- Shows everything on a live dashboard
+The system runs across three machines and works like a mini SOC (Security Operations Center):
 
-## Tech Stack
+- **IDS** watches all incoming network traffic and raises an alert when it spots something suspicious
+- **PDP** receives the alert, checks the attacker's trust score and zone, then decides what to do
+- **PEP** carries out the decision — blocks the IP using iptables, then automatically unblocks it after the timeout
 
-| Category | Technologies |
-|----------|--------------|
-| Language | Python |
-| Detection | Scapy (packet sniffing) |
-| Backend | Flask, SQLite |
-| AI | Ollama (qwen3:4b) |
-| Firewall | iptables |
-| Dashboard | HTML, CSS, JavaScript, Chart.js |
-| Security | TLS/SSL, HMAC-SHA256 |
+If the same attacker keeps coming back, the block duration increases automatically (exponential backoff). If their trust score hits zero, they get permanently blocked.
 
-## How It Works
-Attacker → IDS (detects) → PDP (decides) → PEP (blocks) → Dashboard (shows)
-↓
-AI Analysis
+---
 
-text
+## Attack Types Detected
 
-**Three main components:**
+| Attack | How It's Detected |
+|---|---|
+| ICMP Flood | Ping flood exceeds adaptive threshold |
+| SYN Flood | TCP SYN packets exceed threshold |
+| UDP Flood | UDP packets exceed threshold |
+| Port Scan | 15+ unique ports hit within 10 seconds |
+| DDoS | 3+ different IPs attacking same target within 60s |
 
-| Component | What it does | Where it runs |
-|-----------|--------------|---------------|
-| IDS | Sniffs network packets, detects attacks | Ubuntu |
-| PDP | Makes policy decisions, tracks trust scores | Windows |
-| PEP | Blocks IPs using firewall rules | Ubuntu |
+---
 
 ## Key Features
 
-### Detection
-- Real-time packet capture on network interface
-- Detects ICMP, SYN, and UDP floods
-- Detects port scans (15+ ports in 10 seconds)
-- Adaptive threshold that learns normal traffic patterns
+- **Adaptive Thresholding** — IDS learns normal traffic baseline (mean + 3×std_dev) instead of using a fixed number
+- **Dynamic Trust Scoring** — every IP gets a score (0–100) that drops on attacks and recovers over time
+- **Zone-Based Policies** — RED/YELLOW/GREEN zones each have different thresholds and block durations
+- **Exponential Backoff** — block durations: 60s → 120s → 300s → 600s → 1 hour
+- **AI Threat Analysis** — Ollama (qwen3:4b) classifies every threat as CRITICAL/HIGH/MEDIUM/LOW with recommendations
+- **HMAC-SHA256 Audit Logs** — every log entry is signed to prevent tampering
+- **GeoIP Intelligence** — country, city, ISP, proxy/datacenter detection per attacker IP
+- **Real-Time SOC Dashboard** — live charts, GeoIP map, DDoS alerts, and one-click PDF reports
+- **TLS Encrypted Communication** — all agent-to-agent traffic is encrypted
 
-### Intelligent Decision Making
-- Each IP has a trust score (0 to 100)
-- Trust decreases when IP attacks, recovers over time
-- Three security zones (RED, YELLOW, GREEN) with different rules
-- Block duration increases for repeat offenders (exponential backoff)
+---
 
-### AI-Powered Analysis
-- Local Ollama LLM (qwen3:4b) - completely free, no API key
-- Analyzes every blocked attack automatically
-- Provides threat level, attack pattern, assessment, and recommendation
+## NIST SP 800-207 Compliance
 
-### SOC Dashboard
-- Real-time attack feed with HMAC signatures
-- Live charts and graphs
-- Network map showing attack path
-- GeoIP intelligence (shows attacker location)
-- DDoS detection (3+ IPs attacking same target)
-- PDF report generation
+| Tenet | Implementation |
+|---|---|
+| Tenet 1 — Treat all sources as threats | Every packet inspected regardless of source |
+| Tenet 2 — Secure all communication | TLS between all agents |
+| Tenet 3 — Per-session access | Auto-unblock after block duration — no permanent implicit trust |
+| Tenet 5 — Continuous monitoring | IDS runs 24/7 + 60s watchdog re-verification after every unblock |
+| Tenet 6 — Strict authentication | API key required on every IDS alert and PEP command |
+| Tenet 7 — Collect telemetry | HMAC-signed logs, adaptive thresholds, AI analysis per event |
 
-## Quick Start
+---
 
-### Prerequisites
+## Tech Stack
 
-| Machine | IP Address | Role |
-|---------|------------|------|
-| Windows | 192.168.x.x | PDP + Dashboard |
-| Ubuntu | 192.168.x.x | IDS + PEP |
+| Component | Technology |
+|---|---|
+| Packet Capture | Python, Scapy |
+| Policy Engine | Python, Flask |
+| Firewall Enforcement | iptables |
+| AI Threat Analysis | Ollama (qwen3:4b) |
+| SOC Dashboard | HTML, Chart.js, JavaScript |
+| Database | SQLite |
+| Security | HMAC-SHA256, TLS (self-signed) |
 
-### Step 1: Install Dependencies
+---
 
-**Windows:**
+## Lab Setup
+
+Three machines running in a virtual network:
+
+```
+Windows (PDP)   192.168.x.x    — Decision engine + AI analysis
+Ubuntu  (IDS/PEP) 192.168.x.x  — Packet capture + firewall enforcement + dashboard
+Kali    (Attacker) 192.168.x.x   — Attack simulation
+```
+
+---
+
+## How to Run
+
+### Requirements
+
+**Windows (PDP machine):**
 ```bash
-pip install flask flask-cors requests
-Ubuntu:
+pip install flask flask-cors requests cryptography
+```
 
-bash
-sudo apt update
-sudo apt install python3-pip iptables tcpdump
-pip3 install scapy requests flask flask-cors
-Step 2: Generate Certificates (for HTTPS)
-bash
-python generate_certs.py
-Step 3: Run All Components
-Open 3 terminals:
+**Ubuntu (IDS/PEP machine):**
+```bash
+pip3 install flask flask-cors requests scapy cryptography
+```
 
-Terminal 1 (Windows - PDP):
+**Ollama (AI engine):**
+```bash
+# Install from https://ollama.com then:
+ollama pull qwen3:4b
+```
 
-bash
+### Startup Order
+
+Run these in order — sequence matters:
+
+```bash
+# 1. Windows — start AI engine
+ollama serve
+
+# 2. Windows — start PDP
 python pdp_agent.py
-Terminal 2 (Ubuntu - PEP):
 
-bash
+# 3. Ubuntu — start PEP (needs sudo for iptables)
 sudo python3 pep_agent.py
-Terminal 3 (Ubuntu - IDS):
 
-bash
+# 4. Ubuntu — start IDS (needs sudo for packet capture)
 sudo python3 ids_agent.py
-Step 4: Open Dashboard
-text
-https://192.168.50.1:8080
-Step 5: Test with Attack Simulator (Optional)
-On Kali or any Linux machine:
 
-bash
+# 5. Ubuntu — open dashboard in browser
+# Open dashboard.html in any browser
+
+# 6. Kali — run attack simulator
 sudo python3 attack_simulator.py
-Project Structure
-text
-├── ids_agent.py          # Packet sniffer - detects attacks
-├── pdp_agent.py          # Policy engine - makes decisions
-├── pep_agent.py          # Firewall controller - blocks IPs
-├── ai_analyst.py         # LLM integration for threat analysis
-├── geoip.py              # GeoIP lookup for attackers
-├── ddos_correlator.py    # DDoS detection engine
-├── dashboard.html        # Web dashboard UI
-├── dashboard_server.py   # Dashboard server
-├── attack_simulator.py   # Demo attack tool
-├── generate_certs.py     # TLS certificate generator
-├── logger_utils.py       # Logging utility
-├── config.json           # Configuration file
-└── requirements.txt      # Python dependencies
-Configuration
-Edit config.json to change:
+```
 
-Setting	What it controls
-threshold	Packets per second needed to trigger alert
-block_duration	How long an IP stays blocked (seconds)
-trust_decrease	Points deducted when IP attacks
-zones	RED/YELLOW/GREEN policy settings
-Sample Attack Demo
-Run the attack simulator and select:
+> **First time only:** Delete `security.db` before starting for a clean database.
 
-Mode 1: Quick 10-second ICMP burst (fastest trigger)
+### Attack Simulator Modes
 
-Mode 2: Full demo (all attack types, all zones)
+```
+1. Quick Demo    — 10s ICMP burst, fastest way to trigger the pipeline
+2. Full Demo     — All attack types across all zones
+3. Custom        — Choose IP, type, and rate manually
+4. Stealth Test  — Traffic below threshold, verifies no false positives
+5. Escalation    — Slowly ramps up, shows adaptive threshold in action
+6. Port Scan     — Simulates nmap-style reconnaissance
+```
 
-Mode 4: Stealth test (below threshold - should NOT trigger)
+---
 
-Mode 5: Escalation (slowly ramps up - shows adaptive threshold)
+## How the Pipeline Works
 
-Mode 6: Port scan (triggers PORT_SCAN detection)
+```
+Kali sends attack
+      ↓
+IDS detects threshold breach → classifies attack type
+      ↓
+IDS sends JSON alert to PDP (HTTPS + API key)
+      ↓
+PDP checks trust score + zone policy → decides action
+      ↓
+PDP sends BLOCK command to PEP (HTTPS + API key)
+      ↓
+PEP adds iptables DROP rule
+      ↓
+Auto-unblock after block duration (self-healing)
+```
 
-NIST SP 800-207 Compliance (Zero Trust)
-Tenet	How it's implemented
-1	Every IP has dynamic trust score
-2	TLS/SSL between all agents
-3	Block durations increase with repeat offenses
-4	Zone-based policies (RED/YELLOW/GREEN)
-5	Watchdog re-verification after unblock
-6	HMAC-SHA256 signatures on all logs
-7	Adaptive threshold based on traffic baseline
-Why This Project Matters for My Internship
+---
 
-This project demonstrates:
+## Notes
 
-Blue Team Skills: Detection, blocking, monitoring, incident response
-NIST Knowledge: Zero Trust architecture implementation
-AI Integration: Using LLMs for security analysis
-Full Stack Development: Python backend + web dashboard
-System Design: Distributed architecture with 3 agents
-Security Standards: OWASP, NIST, secure coding practices
+- Dashboard shows a browser warning because TLS uses a self-signed certificate. Click **Advanced → Proceed** to continue.
+- This project was built and tested in a controlled lab environment for educational purposes.
+- Config files with IP addresses and API keys have been removed from this repository.
 
-Author
-Muhammad Zain Tanveer
-BS Cyber Security, Air University Islamabad
+
